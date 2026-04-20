@@ -7,7 +7,7 @@
 
 ## Overview
 
-This project implements a self-pruning neural network that learns to remove its own unnecessary weights **during training** — not as a post-training step.
+This project implements a self-pruning neural network that learns to remove its own unnecessary weights **during training**, not as a post-training step.
 
 Each weight in the network is associated with a learnable scalar gate. During training, a sparsity regularization term pushes most gates toward zero, effectively pruning the corresponding weights on the fly. The result is a sparse network that retains accuracy while discarding redundant connections.
 
