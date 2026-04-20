@@ -1,32 +1,36 @@
 # Self-Pruning Neural Network — Report
 
 **Tredence AI Engineering Internship — Case Study Submission**  
-**Mona Agrawal | RA2311003011733**
+**Mona Mahendra Kumar Agrawal | RA2311003011733**
 
 ---
 
 ## 1. Why L1 on Sigmoid Gates Encourages Sparsity
 
-The sigmoid function maps any real-valued `gate_score` to a gate value in the range (0, 1). Without any regularization, the network has no incentive to push these gate values toward zero — they will settle wherever the classification loss is minimized.
+The sigmoid function maps each learnable `gate_score` to a value in the range (0, 1). Without regularization, the network has no incentive to reduce these gate values, and most connections remain active.
 
-Adding an **L1 penalty** on the gate values changes this. The L1 norm penalizes each gate proportional to its absolute value. Since gates are always positive after sigmoid, this penalty equals the sum (or mean) of all gate values. Minimizing this term directly pressures every gate toward zero.
+To encourage sparsity, an L1 penalty is applied to the gate values. Since all gates are positive after the sigmoid transformation, this corresponds to penalizing their magnitude directly. Minimizing this term pushes many gates toward zero, effectively pruning the corresponding weights.
 
-The key property that makes L1 effective here — as opposed to L2 — is that L1 applies a **constant gradient** regardless of the gate's current magnitude. L2 produces a gradient proportional to the value itself, so as a weight shrinks toward zero, the gradient shrinks too and the weight never quite reaches zero. L1 does not have this problem: it applies equal pressure at every magnitude, which is what allows gates to collapse to (near) zero and stay there.
+In practice, the sparsity penalty is implemented as the **mean of all gate values** rather than the raw sum. This normalizes the loss magnitude with respect to the number of parameters and ensures stable training while preserving the behavior of L1 regularization.
+
+A key property of L1 regularization is that it applies a **constant gradient**, independent of the parameter magnitude. Unlike L2 regularization, where gradients shrink as values approach zero, L1 continues to push parameters down uniformly. This makes it effective at driving many gates to (near) zero.
 
 In practice:
+- Gates that contribute significantly to classification remain active because removing them would increase classification loss.
+- Gates corresponding to weak or redundant connections are driven toward zero by the sparsity penalty.
 
-- Gates that are **genuinely useful** to the network resist the penalty because eliminating them would hurt classification loss more than it saves on sparsity loss.
-- Gates that correspond to **redundant or weak connections** offer little benefit to classification, so the L1 penalty wins and drives them to zero.
+The result is a sparse network that retains only the most important connections.
 
-The result is a naturally sparse network where only the most informative connections survive.
-
-**Note on threshold:** Sparsity is reported as the percentage of gates with value below `0.1`. Gates never reach exactly zero due to the asymptotic nature of sigmoid, so this threshold captures all gates that are functionally inactive.
+**Note on threshold:**  
+Sparsity is measured as the percentage of gates with values below **0.1**. Since sigmoid outputs never reach exact zero, this threshold identifies gates that are effectively inactive.
 
 ---
 
 ## 2. Results
 
-Training was conducted on CIFAR-10 for **35 epochs** across four values of λ using the Adam optimizer. Gate scores were trained at a higher learning rate (`5e-3`) than weights (`1e-3`) to allow the pruning mechanism to adapt faster.
+Training was conducted on CIFAR-10 for **35 epochs** across four values of λ using the Adam optimizer. Gate parameters were trained with a higher learning rate (`5e-3`) than weights (`1e-3`) to allow faster adaptation of pruning behavior.
+
+All experiments were run with a fixed random seed (**23**) for reproducibility.
 
 | Lambda | Test Accuracy | Sparsity (%) |
 |:------:|:-------------:|:------------:|
@@ -41,30 +45,34 @@ Training was conducted on CIFAR-10 for **35 epochs** across four values of λ us
 
 ### Sparsity increases consistently with λ
 
-As expected, higher λ places a stronger penalty on active gates, causing more of them to collapse toward zero. Sparsity grows from ~47% at λ=0.05 to ~79% at λ=1.0 — nearly doubling the number of pruned weights.
+As λ increases, the penalty on active gates becomes stronger, pushing more gates toward zero. Sparsity rises steadily from ~47% at λ = 0.05 to ~79% at λ = 1.0.
 
 ### Accuracy remains stable across all λ values
 
-The most notable observation is that test accuracy barely changes despite large increases in sparsity. Across all four settings, accuracy stays within a ~0.8% band (61.01% to 61.78%). This indicates that the network, even in its dense form, contains significant **redundancy** — a large fraction of its connections carry little discriminative information and can be removed without meaningful loss.
+Despite large increases in sparsity, test accuracy remains within a narrow range (~61–62%). This indicates that the original dense network contains significant redundancy, and many connections can be removed without affecting performance.
 
-### Higher λ does not hurt — it slightly helps
+### Higher λ slightly improves generalization
 
-Counterintuitively, the highest λ (1.0) produces both the highest sparsity and the marginally highest accuracy. This is likely a mild regularization effect: by eliminating weak, noisy connections, the network is forced to route information through its stronger pathways, which slightly reduces overfitting.
+The highest λ (1.0) achieves both the highest sparsity and the best accuracy. This suggests a mild regularization effect: removing weak connections reduces noise and improves generalization.
 
-### The accuracy ceiling is set by architecture, not pruning
+### Accuracy is limited by architecture
 
-All four runs converge to approximately 61-62% test accuracy. This ceiling is a property of the underlying architecture — a simple 3-layer MLP applied to flattened 32×32 images — not of the pruning mechanism. A convolutional backbone would produce significantly higher accuracy, but that was not the focus of this task.
+All configurations converge to a similar accuracy range (~61–62%). This ceiling is due to the simplicity of the architecture (a fully connected MLP on flattened images), not the pruning mechanism itself. A convolutional model would likely achieve higher accuracy.
 
-### λ trade-off in practice
+### Practical λ selection
 
-In a deployment scenario, the optimal λ would be chosen based on a target sparsity or memory budget. Based on these results, λ=0.5 appears to be a practical sweet spot: it prunes nearly 70% of weights while losing less than 0.5% accuracy compared to the least-pruned model.
+For deployment scenarios:
+- λ = 0.5 provides a strong trade-off (~70% sparsity with minimal accuracy loss)
+- λ = 1.0 maximizes sparsity with no performance degradation in this setup
 
 ---
 
 ## 4. Gate Distribution
 
-The plot below shows the distribution of all gate values for the best model (λ = 1.0). The dashed vertical line marks the sparsity threshold of 0.1.
+The plot below shows the distribution of gate values for the best model (λ = 1.0). The dashed vertical line represents the sparsity threshold (0.1).
 
-![Gate Distribution](results/gate_distribution.png)
+![Gate Distribution](gate_distribution.png)
 
-The distribution shows a large spike concentrated near zero, confirming that the majority of gates have been driven to near-zero values and are effectively pruned. A smaller tail of active gates (values > 0.1) represents the connections the network identified as genuinely necessary. This bimodal pattern — a dense cluster at zero and a sparse tail of surviving connections — is the expected signature of a successfully trained self-pruning network.
+The distribution exhibits a strong concentration of values near zero, confirming that most gates have been effectively pruned. A smaller set of gates remains active, corresponding to important connections.
+
+This bimodal pattern — a dense cluster near zero and a sparse set of active gates — is the expected outcome of successful self-pruning.

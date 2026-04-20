@@ -8,7 +8,13 @@ import torchvision.transforms as transforms
 from torch.utils.data import DataLoader
 import matplotlib.pyplot as plt
 import numpy as np
-import os
+import random
+
+def set_seed(seed=23):
+    random.seed(seed)
+    np.random.seed(seed)
+    torch.manual_seed(seed)
+    torch.cuda.manual_seed_all(seed)
 
 
 # ─────────────────────────────────────────────
@@ -160,8 +166,7 @@ def plot(model, lam):
     plt.xlabel("Gate Value")
     plt.ylabel("Count")
 
-    os.makedirs("results", exist_ok=True)
-    plt.savefig("results/gate_distribution.png")
+    plt.savefig("gate_distribution.png")
     plt.close()
 
 
@@ -169,9 +174,10 @@ def plot(model, lam):
 # Main
 # ─────────────────────────────────────────────
 def main():
-    os.makedirs("results", exist_ok=True)
+    set_seed(23)
 
     device = torch.device("cuda" if torch.cuda.is_available() else "cpu")
+
     print("="*60)
     print("Device:", device)
     print("="*60)
@@ -214,26 +220,21 @@ def main():
         if test_acc > best_acc:
             best_acc, best_model, best_lam = test_acc, model, lam
 
-    # PRINT CLEAN TABLE
     print("\n" + "="*60)
     print("FINAL RESULTS")
     print("="*60)
     print(f"{'Lambda':<10}{'Accuracy':<15}{'Sparsity (%)':<15}")
     print("-"*60)
 
-    with open("results/results.txt", "w") as f:
-        for lam, acc, sp in results:
-            line = f"{lam:<10}{acc:<15.2f}{sp:<15.2f}"
-            print(line)
-            f.write(line + "\n")
+    for lam, acc, sp in results:
+        print(f"{lam:<10}{acc:<15.2f}{sp:<15.2f}")
 
     print("="*60)
 
     plot(best_model, best_lam)
 
-    print("\nSaved files:")
-    print("results/results.txt")
-    print("results/gate_distribution.png")
+    print("\nSaved file:")
+    print("gate_distribution.png")
 
 
 if __name__ == "__main__":

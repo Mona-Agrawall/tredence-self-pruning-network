@@ -19,12 +19,10 @@ The model is trained and evaluated on **CIFAR-10** across four values of the spa
 
 ```
 .
-├── prunable_network.py       # Main script: model, training loop, evaluation, plots
+├── main.py                   # Main script: model, training loop, evaluation, plots
 ├── requirements.txt          # Dependencies
-├── report.md                 # Analysis report with results and explanation
-├── results/
-│   ├── results.txt           # Accuracy and sparsity table for all λ values
-│   └── gate_distribution.png # Gate value histogram for best model (λ = 1.0)
+├── REPORT.md                 # Analysis report with results and explanation
+├── gate_distribution.png     # Gate value histogram for best model (λ = 1.0)
 └── README.md
 ```
 
@@ -78,7 +76,7 @@ where `SparsityLoss` is the **mean of all gate values** across all `PrunableLine
 
 ## Gate Distribution (Best Model — λ = 1.0)
 
-![Gate Distribution](results/gate_distribution.png)
+![Gate Distribution](gate_distribution.png)
 
 The large spike near 0 confirms successful pruning. The dashed line marks the sparsity threshold (0.1).
 
@@ -95,16 +93,16 @@ pip install -r requirements.txt
 ### Run training
 
 ```bash
-python prunable_network.py
+python main.py
 ```
 
 CIFAR-10 will be downloaded automatically on first run into `./data/`.
 
 ### Outputs
 
-After training completes:
-- `results/results.txt` — accuracy and sparsity for all λ values
-- `results/gate_distribution.png` — gate histogram for the best model
+After execution:
+- `REPORT.md` — results table and analysis
+- `gate_distribution.png` — gate value distribution
 
 > **Note:** Training was run on CPU. Runtime will vary by machine. A GPU is recommended for faster experimentation.
 
