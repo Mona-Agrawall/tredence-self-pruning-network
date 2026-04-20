@@ -1,0 +1,69 @@
+0.05      61.01          46.68          
+0.1       61.29          51.43          
+0.5       61.46          69.58          
+1.0       61.78          78.60
+
+Result on the console-
+============================================================
+Device: cpu
+============================================================
+100% 170M/170M [00:06<00:00, 24.4MB/s]
+
+==================== λ = 0.05 ====================
+Epoch 01 | Acc  35.5% | Sparsity   0.0%
+Epoch 05 | Acc  49.1% | Sparsity   1.4%
+Epoch 10 | Acc  53.7% | Sparsity  10.0%
+Epoch 15 | Acc  56.5% | Sparsity  21.3%
+Epoch 20 | Acc  58.5% | Sparsity  30.7%
+Epoch 25 | Acc  60.1% | Sparsity  37.6%
+Epoch 30 | Acc  61.2% | Sparsity  42.7%
+Epoch 35 | Acc  62.5% | Sparsity  46.7%
+
+Final → Accuracy 61.01% | Sparsity 46.68%
+
+==================== λ = 0.1 ====================
+Epoch 01 | Acc  35.6% | Sparsity   0.0%
+Epoch 05 | Acc  49.1% | Sparsity   2.0%
+Epoch 10 | Acc  53.5% | Sparsity  13.3%
+Epoch 15 | Acc  56.4% | Sparsity  26.3%
+Epoch 20 | Acc  58.5% | Sparsity  35.9%
+Epoch 25 | Acc  60.2% | Sparsity  42.7%
+Epoch 30 | Acc  61.4% | Sparsity  47.7%
+Epoch 35 | Acc  62.4% | Sparsity  51.4%
+
+Final → Accuracy 61.29% | Sparsity 51.43%
+
+==================== λ = 0.5 ====================
+Epoch 01 | Acc  35.7% | Sparsity   0.0%
+Epoch 05 | Acc  49.0% | Sparsity  13.4%
+Epoch 10 | Acc  53.9% | Sparsity  37.6%
+Epoch 15 | Acc  56.8% | Sparsity  51.0%
+Epoch 20 | Acc  58.6% | Sparsity  58.7%
+Epoch 25 | Acc  60.3% | Sparsity  63.6%
+Epoch 30 | Acc  61.3% | Sparsity  67.0%
+Epoch 35 | Acc  62.6% | Sparsity  69.6%
+
+Final → Accuracy 61.46% | Sparsity 69.58%
+
+==================== λ = 1.0 ====================
+Epoch 01 | Acc  35.8% | Sparsity   0.5%
+Epoch 05 | Acc  49.4% | Sparsity  30.3%
+Epoch 10 | Acc  54.0% | Sparsity  54.5%
+Epoch 15 | Acc  57.0% | Sparsity  65.0%
+Epoch 20 | Acc  58.7% | Sparsity  70.7%
+Epoch 25 | Acc  60.3% | Sparsity  74.3%
+Epoch 30 | Acc  61.6% | Sparsity  76.8%
+Epoch 35 | Acc  63.0% | Sparsity  78.6%
+
+Final → Accuracy 61.78% | Sparsity 78.60%
+
+============================================================
+FINAL RESULTS
+============================================================
+Lambda    Accuracy       Sparsity (%)   
+------------------------------------------------------------
+0.05      61.01          46.68          
+0.1       61.29          51.43          
+0.5       61.46          69.58          
+1.0       61.78          78.60          
+============================================================
